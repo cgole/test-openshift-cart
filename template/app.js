@@ -1,56 +1,36 @@
+
 /**
- * App Dependencies.
+ * Module dependencies.
  */
 
-require('strong-agent').profile();
+var express = require('express')
+  , routes = require('./routes')
+  , user = require('./routes/user')
+  , http = require('http')
+  , path = require('path');
 
-var control = require('strong-cluster-control');
-var options = control.loadOptions();
+var app = express();
 
-// If configured as a cluster master, just start controller
-if (options.clustered && options.isMaster) {
-  return control.start(options);
+// all environments
+app.set('ip', process.env.OPENSHIFT_NODEJS_IP || "localhost");
+app.set('port', process.env.OPENSHIFT_NODEJS_PORT || 3000);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
+
+// development only
+if ('development' == app.get('env')) {
+  app.use(express.errorHandler());
 }
 
-var loopback = require('loopback')
-  , app = module.exports = loopback()
-  , fs = require('fs')
-  , path = require('path')
-  , cors = require('cors')
-  , request = require('request')
-  , TaskEmitter = require('strong-task-emitter');
+app.get('/', routes.index);
+app.get('/users', user.list);
 
-// Set up the HTTP listener ip & port
-var ip = process.env.IP || '0.0.0.0'
-var port = process.env.PORT || 3000;
-var baseURL = 'http://' + ip + ':' + port;
-app.set('ip', ip);
-app.set('port', port);
-
-// Establish our overly-permissive CORS rules.
-app.use(cors());
-
-// Expose a rest api
-app.use(loopback.rest());
-
-// Add static files
-app.use(loopback.static(path.join(__dirname, 'public')));
-
-// Require models
-fs
-  .readdirSync(path.join(__dirname, './models'))
-  .filter(function(m) {
-    return path.extname(m) === '.js';
-  })
-  .forEach(function(m) {
-    // expose model over rest
-    app.model(require('./models/' + m));
-  });
-
-// Enable docs
-app.docs({basePath: baseURL});
-
-// Start the server
-app.listen(port, ip, function() {
-  console.log('StrongLoop Suite sample is now ready at ' + baseURL);
+http.createServer(app).listen(app.get('port'), app.get('ip'), function(){
+  console.log('Express server listening on ip:' + app.get('ip') + ' port:' + app.get('port'));
 });
