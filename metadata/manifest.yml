@@ -5,13 +5,13 @@ Description: "Node.js is a platform built on Chrome's JavaScript runtime for eas
 Version: "0.10"
 Versions: ['0.10', '0.6']
 Source-Url: https://github.com/cgole/test-openshift-cart.git
-License: MIT License
-License-Url: https://raw.github.com/joyent/node/v0.6/LICENSE
-Vendor: www.nodejs.org
-Website: "http://www.nodejs.org/"
+License: StrongLoop License
+License-Url:
+Vendor: strongloop.com
+Website: "http://strongloop.com/"
 Install-Build-Required: true
 Cartridge-Version: 0.0.1
-Cartridge-Vendor: wshearn
+Cartridge-Vendor: strongloop
 Categories:
   - service
   - javascript
